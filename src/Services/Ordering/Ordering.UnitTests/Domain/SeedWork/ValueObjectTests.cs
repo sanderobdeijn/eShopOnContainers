@@ -8,63 +8,55 @@ namespace Ordering.UnitTests.Domain.SeedWork
 {
     public class ValueObjectTests
     {
-        public ValueObjectTests()
-        { }
+		[Theory]
+		[MemberData(nameof(EqualValueObjects))]
+		public void Equals_EqualValueObjects_ReturnsTrue(IValueObject instanceA, IValueObject instanceB, string reason)
+		{
+			// Act
+			var result = EqualityComparer<IValueObject>.Default.Equals(instanceA, instanceB);
 
-        [Theory]
-        [MemberData(nameof(EqualValueObjects))]
-        public void Equals_EqualValueObjects_ReturnsTrue(ValueObject instanceA, ValueObject instanceB, string reason)
-        {
-            // Act
-            var result = EqualityComparer<ValueObject>.Default.Equals(instanceA, instanceB);
-
-            // Assert
-            Assert.True(result, reason);
-        }
+			// Assert
+			Assert.True(result, reason);
+		}
 
         [Theory]
         [MemberData(nameof(NonEqualValueObjects))]
-        public void Equals_NonEqualValueObjects_ReturnsFalse(ValueObject instanceA, ValueObject instanceB, string reason)
+        public void Equals_NonEqualValueObjects_ReturnsFalse(IValueObject instanceA, IValueObject instanceB, string reason)
         {
             // Act
-            var result = EqualityComparer<ValueObject>.Default.Equals(instanceA, instanceB);
+            var result = EqualityComparer<IValueObject>.Default.Equals(instanceA, instanceB);
 
             // Assert
             Assert.False(result, reason);
         }
 
-        private static readonly ValueObject APrettyValueObject = new ValueObjectA(1, "2", Guid.Parse("97ea43f0-6fef-4fb7-8c67-9114a7ff6ec0"), new ComplexObject(2, "3"));
+        private static readonly IValueObject APrettyValueObject = new ValueObjectA(1, "2", Guid.Parse("97ea43f0-6fef-4fb7-8c67-9114a7ff6ec0"), new ComplexObject(2, "3"));
 
-        public static readonly TheoryData<ValueObject, ValueObject, string> EqualValueObjects = new TheoryData<ValueObject, ValueObject, string>
+        public static readonly TheoryData<IValueObject, IValueObject, string> EqualValueObjects = new TheoryData<IValueObject, IValueObject, string>
         {
-            {
-                null,
-                null,
-                "they should be equal because they are both null"
-            },
-            {
-                APrettyValueObject,
-                APrettyValueObject,
-                "they should be equal because they are the same object"
-            },
-            {
-                new ValueObjectA(1, "2", Guid.Parse("97ea43f0-6fef-4fb7-8c67-9114a7ff6ec0"), new ComplexObject(2, "3")),
-                new ValueObjectA(1, "2", Guid.Parse("97ea43f0-6fef-4fb7-8c67-9114a7ff6ec0"), new ComplexObject(2, "3")),
-                "they should be equal because they have equal members"
-            },
-            {
-                new ValueObjectA(1, "2", Guid.Parse("97ea43f0-6fef-4fb7-8c67-9114a7ff6ec0"), new ComplexObject(2, "3"), notAnEqualityComponent: "xpto"),
-                new ValueObjectA(1, "2", Guid.Parse("97ea43f0-6fef-4fb7-8c67-9114a7ff6ec0"), new ComplexObject(2, "3"), notAnEqualityComponent: "xpto2"),
-                "they should be equal because all equality components are equal, even though an additional member was set"
-            },
-            {
+			{
+				null,
+				null,
+				"they should be equal because they are both null"
+			},
+			{
+				APrettyValueObject,
+				APrettyValueObject,
+				"they should be equal because they are the same object"
+			},
+			{
+				new ValueObjectA(1, "2", Guid.Parse("97ea43f0-6fef-4fb7-8c67-9114a7ff6ec0"), new ComplexObject(2, "3")),
+				new ValueObjectA(1, "2", Guid.Parse("97ea43f0-6fef-4fb7-8c67-9114a7ff6ec0"), new ComplexObject(2, "3")),
+				"they should be equal because they have equal members"
+			},
+			{
                 new ValueObjectB(1, "2",  1, 2, 3 ),
                 new ValueObjectB(1, "2",  1, 2, 3 ),
                 "they should be equal because all equality components are equal, including the 'C' list"
             }
         };
 
-        public static readonly TheoryData<ValueObject, ValueObject, string> NonEqualValueObjects = new TheoryData<ValueObject, ValueObject, string>
+        public static readonly TheoryData<IValueObject, IValueObject, string> NonEqualValueObjects = new TheoryData<IValueObject, IValueObject, string>
         {
             {
                 new ValueObjectA(a: 1, b: "2", c: Guid.Parse("97ea43f0-6fef-4fb7-8c67-9114a7ff6ec0"), d: new ComplexObject(2, "3")),
@@ -104,33 +96,23 @@ namespace Ordering.UnitTests.Domain.SeedWork
 
         };
 
-        private class ValueObjectA : ValueObject
+        private record ValueObjectA : IValueObject
         {
-            public ValueObjectA(int a, string b, Guid c, ComplexObject d, string notAnEqualityComponent = null)
+            public ValueObjectA(int a, string b, Guid c, ComplexObject d)
             {
                 A = a;
                 B = b;
                 C = c;
                 D = d;
-                NotAnEqualityComponent = notAnEqualityComponent;
             }
 
             public int A { get; }
             public string B { get; }
             public Guid C { get; }
             public ComplexObject D { get; }
-            public string NotAnEqualityComponent { get; }
-
-            protected override IEnumerable<object> GetEqualityComponents()
-            {
-                yield return A;
-                yield return B;
-                yield return C;
-                yield return D;
-            }
         }
 
-        private class ValueObjectB : ValueObject
+        private record ValueObjectB : IValueObject
         {
             public ValueObjectB(int a, string b, params int[] c)
             {
@@ -143,17 +125,6 @@ namespace Ordering.UnitTests.Domain.SeedWork
             public string B { get; }
 
             public List<int> C { get; }
-
-            protected override IEnumerable<object> GetEqualityComponents()
-            {
-                yield return A;
-                yield return B;
-
-                foreach (var c in C)
-                {
-                    yield return c;
-                }
-            }
         }
 
         private class ComplexObject : IEquatable<ComplexObject>
