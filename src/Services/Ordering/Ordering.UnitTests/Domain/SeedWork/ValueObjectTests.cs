@@ -59,22 +59,22 @@ namespace Ordering.UnitTests.Domain.SeedWork
         public static readonly TheoryData<IValueObject, IValueObject, string> NonEqualValueObjects = new TheoryData<IValueObject, IValueObject, string>
         {
             {
-                new ValueObjectA(a: 1, b: "2", c: Guid.Parse("97ea43f0-6fef-4fb7-8c67-9114a7ff6ec0"), d: new ComplexObject(2, "3")),
-                new ValueObjectA(a: 2, b: "2", c: Guid.Parse("97ea43f0-6fef-4fb7-8c67-9114a7ff6ec0"), d: new ComplexObject(2, "3")),
+                new ValueObjectA(A: 1, B: "2", C: Guid.Parse("97ea43f0-6fef-4fb7-8c67-9114a7ff6ec0"), D: new ComplexObject(2, "3")),
+                new ValueObjectA(A: 2, B: "2", C: Guid.Parse("97ea43f0-6fef-4fb7-8c67-9114a7ff6ec0"), D: new ComplexObject(2, "3")),
                 "they should not be equal because the 'A' member on ValueObjectA is different among them"
             },
             {
-                new ValueObjectA(a: 1, b: "2", c: Guid.Parse("97ea43f0-6fef-4fb7-8c67-9114a7ff6ec0"), d: new ComplexObject(2, "3")),
-                new ValueObjectA(a: 1, b: null, c: Guid.Parse("97ea43f0-6fef-4fb7-8c67-9114a7ff6ec0"), d: new ComplexObject(2, "3")),
+                new ValueObjectA(A: 1, B: "2", C: Guid.Parse("97ea43f0-6fef-4fb7-8c67-9114a7ff6ec0"), D: new ComplexObject(2, "3")),
+                new ValueObjectA(A: 1, B: null, C: Guid.Parse("97ea43f0-6fef-4fb7-8c67-9114a7ff6ec0"), D: new ComplexObject(2, "3")),
                 "they should not be equal because the 'B' member on ValueObjectA is different among them"
             },
             {
-                new ValueObjectA(a: 1, b: "2", c: Guid.Parse("97ea43f0-6fef-4fb7-8c67-9114a7ff6ec0"), d: new ComplexObject(a: 2, b: "3")),
-                new ValueObjectA(a: 1, b: "2", c: Guid.Parse("97ea43f0-6fef-4fb7-8c67-9114a7ff6ec0"), d: new ComplexObject(a: 3, b: "3")),
+                new ValueObjectA(A: 1, B: "2", C: Guid.Parse("97ea43f0-6fef-4fb7-8c67-9114a7ff6ec0"), D: new ComplexObject(A: 2, B: "3")),
+                new ValueObjectA(A: 1, B: "2", C: Guid.Parse("97ea43f0-6fef-4fb7-8c67-9114a7ff6ec0"), D: new ComplexObject(A: 3, B: "3")),
                 "they should not be equal because the 'A' member on ValueObjectA's 'D' member is different among them"
             },
             {
-                new ValueObjectA(a: 1, b: "2", c: Guid.Parse("97ea43f0-6fef-4fb7-8c67-9114a7ff6ec0"), d: new ComplexObject(a: 2, b: "3")),
+                new ValueObjectA(A: 1, B: "2", C: Guid.Parse("97ea43f0-6fef-4fb7-8c67-9114a7ff6ec0"), D: new ComplexObject(A: 2, B: "3")),
                 new ValueObjectB(a: 1, b: "2"),
                 "they should not be equal because they are not of the same type"
             },
@@ -96,21 +96,12 @@ namespace Ordering.UnitTests.Domain.SeedWork
 
         };
 
-        private record ValueObjectA : IValueObject
-        {
-            public ValueObjectA(int a, string b, Guid c, ComplexObject d)
-            {
-                A = a;
-                B = b;
-                C = c;
-                D = d;
-            }
-
-            public int A { get; }
-            public string B { get; }
-            public Guid C { get; }
-            public ComplexObject D { get; }
-        }
+        private record ValueObjectA(
+            int A, 
+            string B, 
+            Guid C, 
+            ComplexObject D) 
+            : IValueObject;
 
         private record ValueObjectB : IValueObject
         {
@@ -121,40 +112,15 @@ namespace Ordering.UnitTests.Domain.SeedWork
                 C = c.ToList();
             }
 
-            public int A { get; }
-            public string B { get; }
+            public int A { get; init; }
+            public string B { get; init; }
 
-            public List<int> C { get; }
+            public List<int> C { get; init; }
         }
 
-        private class ComplexObject : IEquatable<ComplexObject>
-        {
-            public ComplexObject(int a, string b)
-            {
-                A = a;
-                B = b;
-            }
-
-            public int A { get; set; }
-
-            public string B { get; set; }
-
-            public override bool Equals(object obj)
-            {
-                return Equals(obj as ComplexObject);
-            }
-
-            public bool Equals(ComplexObject other)
-            {
-                return other != null &&
-                       A == other.A &&
-                       B == other.B;
-            }
-
-            public override int GetHashCode()
-            {
-                return HashCode.Combine(A, B);
-            }
-        }
+        private record ComplexObject(
+            int A, 
+            string B) 
+            : IValueObject;
     }
 }
